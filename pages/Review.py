@@ -278,125 +278,137 @@ if st.session_state.logged_in:
 # -----------------------                                       ----------------------   
 
 
-# ----------- Setup page layout/containers ------------------
-
-main_columns = st.columns([0.2,0.8,0.2])
-with main_columns[1]:
-    search_container = st.container()
-    add_vertical_space(1)
-    info_container = st.container()
     
 # ---------- Page Contents ---------------------------------
 
 if st.session_state.logged_in:
-    with search_container:
-        add_vertical_space(3)
-        st.markdown(f"<p style='text-align: left; font-size: 16px; color: black;'>🔍Search Movies</p>", unsafe_allow_html=True)
-        search = search_container.text_input('Search Movies', label_visibility='collapsed')
-        if search:
-            search_movies(search)
-            sorted_list = sort_results()
-            selection = st.selectbox('', sorted_list, label_visibility='collapsed')
-            if selection:
-                for x in st.session_state.search_results:
-                    if x[0] == selection[2]:
-                        pp = x[3]
-                        overview = x[4]
-                get_movie_details(selection, pp, overview)
-                movie = st.session_state.movie_details
-                with info_container:
-                    
-                    ## check for matches 
-                    tier = None
-                    rev_date = None
-                    
-                    id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
-                    if not id_match.empty:
-                        tier = 'S'
-                        rev_date = st.session_state.added_movies_s.loc[id_match.index].date_added.values[0]   
-                    id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
-                    if not id_match.empty:
-                        tier = 'A'
-                        rev_date = st.session_state.added_movies_a.loc[id_match.index].date_added.values[0]   
-                    id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
-                    if not id_match.empty:
-                        tier = 'B'
-                        rev_date = st.session_state.added_movies_b.loc[id_match.index].date_added.values[0]   
-                    id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
-                    if not id_match.empty:
-                        tier = 'C'
-                        rev_date = st.session_state.added_movies_c.loc[id_match.index].date_added.values[0]   
-                    
-                        
-                    
+    # ----------- Setup page layout/containers ------------------
+
+    add_vertical_space(2)
+    with stylable_container(
+        key="container_with_border",
+        css_styles="""
+            {
+                border: 1px solid rgba(49, 51, 63, 0.2);
+                border-radius: 0.5rem;
+                padding: calc(1em - 1px);
+            }
+            """,
+        ): 
+        main_columns = st.columns([0.2,0.8,0.2])
+        with main_columns[1]:
+            search_container = st.container()
+            with search_container:
+                add_vertical_space(1)
+                st.markdown(f"<p style='text-align: left; font-size: 16px; color: black;'>🔍Search Movies</p>", unsafe_allow_html=True)
+                search = search_container.text_input('Search Movies', label_visibility='collapsed')
+                
+                if search:
+                    add_vertical_space(1)
+                    info_container = main_columns[1].container()
+                    search_movies(search)
+                    sorted_list = sort_results()
+                    selection = search_container.selectbox('', sorted_list, label_visibility='collapsed')
+                    if selection:
+                        for x in st.session_state.search_results:
+                            if x[0] == selection[2]:
+                                pp = x[3]
+                                overview = x[4]
+                        get_movie_details(selection, pp, overview)
+                        movie = st.session_state.movie_details
+                        with info_container:
+                            
+                            ## check for matches 
+                            tier = None
+                            rev_date = None
+                            
+                            id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
+                            if not id_match.empty:
+                                tier = 'S'
+                                rev_date = st.session_state.added_movies_s.loc[id_match.index].date_added.values[0]   
+                            id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
+                            if not id_match.empty:
+                                tier = 'A'
+                                rev_date = st.session_state.added_movies_a.loc[id_match.index].date_added.values[0]   
+                            id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
+                            if not id_match.empty:
+                                tier = 'B'
+                                rev_date = st.session_state.added_movies_b.loc[id_match.index].date_added.values[0]   
+                            id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
+                            if not id_match.empty:
+                                tier = 'C'
+                                rev_date = st.session_state.added_movies_c.loc[id_match.index].date_added.values[0]   
+                                
+                                    
+                                
+                            with stylable_container(
+                                key="container_with_border",
+                                css_styles="""
+                                    {
+                                        border: 1px solid rgba(49, 51, 63, 0.2);
+                                        border-radius: 0.5rem;
+                                        padding: calc(1em - 1px);
+                                    }
+                                    """,
+                                ): 
+                                
+                                if tier != None and rev_date != None:
+                                    st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Last reviewed as {tier} tier on {rev_date}</h3>", unsafe_allow_html=True)
+                                
+                                add_vertical_space(1)   
+                                info_cols = st.columns([0.1,0.4,0.4,0.1])
+                                with info_cols[1]:
+                                    add_vertical_space(1)
+                                    # card(
+                                    #     title='', 
+                                    #     text=movie['title'],
+                                    #     image='https://image.tmdb.org/t/p/original/'+movie['poster_path'], 
+                                    #     styles={
+                                    #         "card": {
+                                    #             "width": "275px",
+                                    #             "height": "250px",
+                                    #             "border-radius": "10px",
+                                    #             "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
+                                    #             "margin": "10"
+                                            
+                                    #         },
+                                    #         "text": {
+                                    #             "font-family": "sans-serif",
+                                    #         },
+                                    #         "filter": {
+                                    #             "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
+                                    #         },
+                                    #     },
+                                    #     on_click=do_nothing
+                                    #     )
+                                    st.image('https://image.tmdb.org/t/p/original/'+movie['poster_path'], caption=movie['title'], width=280)
+                                    
+                                keys = ['title', 'director', 'lead', 'release_date']
+                                display = {}
+                                for key, value in st.session_state.movie_details.items():
+                                    if key in keys:
+                                        display[key] = value 
+                                with info_cols[2]:
+                                    add_vertical_space(1)
+                                    st.write(display)
+                                add_vertical_space(1)
+
+                    st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Rate this movie</h3>", unsafe_allow_html=True)
+                    form_columns = st.columns(4)
+
                     with stylable_container(
-                        key="container_with_border",
+                        key="container",
                         css_styles="""
                             {
-                                border: 1px solid rgba(49, 51, 63, 0.2);
-                                border-radius: 0.5rem;
-                                padding: calc(1em - 1px);
+                                text-align: center;
+                                padding: 0, 10, 0, 10;
                             }
                             """,
-                        ): 
-                        
-                        if tier != None and rev_date != None:
-                            st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Last reviewed as {tier} tier on {rev_date}</h3>", unsafe_allow_html=True)
-                        
-                        add_vertical_space(1)   
-                        info_cols = st.columns([0.1,0.4,0.4,0.1])
-                        with info_cols[1]:
-                            add_vertical_space(1)
-                            # card(
-                            #     title='', 
-                            #     text=movie['title'],
-                            #     image='https://image.tmdb.org/t/p/original/'+movie['poster_path'], 
-                            #     styles={
-                            #         "card": {
-                            #             "width": "275px",
-                            #             "height": "250px",
-                            #             "border-radius": "10px",
-                            #             "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
-                            #             "margin": "10"
-                                    
-                            #         },
-                            #         "text": {
-                            #             "font-family": "sans-serif",
-                            #         },
-                            #         "filter": {
-                            #             "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
-                            #         },
-                            #     },
-                            #     on_click=do_nothing
-                            #     )
-                            st.image('https://image.tmdb.org/t/p/original/'+movie['poster_path'], caption=movie['title'], width=280)
-                            
-                        keys = ['title', 'director', 'lead', 'release_date']
-                        display = {}
-                        for key, value in st.session_state.movie_details.items():
-                            if key in keys:
-                                display[key] = value 
-                        with info_cols[2]:
-                            add_vertical_space(1)
-                            st.write(display)
-                        add_vertical_space(1)
-
-                        st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Rate this movie</h3>", unsafe_allow_html=True)
-                        form_columns = st.columns(4)
-
-                        with stylable_container(
-                            key="container",
-                            css_styles="""
-                                {
-                                    text-align: center;
-                                    padding: 0, 10, 0, 10;
-                                }
-                                """,
-                            ):
-                            s_button = form_columns[0].button('S tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'S'])
-                            a_button = form_columns[1].button('A tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'A'])
-                            b_button = form_columns[2].button('B tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'B'])
-                            c_button = form_columns[3].button('C tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'C'])
+                        ):
+                        s_button = form_columns[0].button('S tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'S'])
+                        a_button = form_columns[1].button('A tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'A'])
+                        b_button = form_columns[2].button('B tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'B'])
+                        c_button = form_columns[3].button('C tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'C'])
                         
                     
                     
@@ -459,7 +471,8 @@ if st.session_state.logged_in:
                         user_ref.set({'addedMoviesC': st.session_state.added_movies_c.to_dict('records')}, merge=True)
                         st.session_state.movie_details = {} 
                         switch_page('home')
-                
+                else:
+                    add_vertical_space(45)        
                 
     
 else:

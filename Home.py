@@ -217,7 +217,7 @@ if st.session_state.logged_in:
                     
 # -----------------------                                       ----------------------   
 
-add_vertical_space(1)
+add_vertical_space(3)
 if st.session_state.logged_in: 
     tier_tabs = st.tabs(['S tier         ', 'A tier         ', 'B tier         ', 'C tier         '])
     for i,tab in enumerate(tier_tabs):
@@ -239,9 +239,9 @@ if st.session_state.logged_in:
             if added_movies.shape[0] > 0:
                 grid_container = st.container()   
                 with grid_container:    
-                    grid_cols = st.columns(3)
+                    grid_cols = st.columns(4)
                     for x in range(added_movies.shape[0]):
-                        col = grid_cols[x%3]
+                        col = grid_cols[x%4]
                         with col:
                             with stylable_container(
                                 key="container_with_border",
@@ -254,9 +254,15 @@ if st.session_state.logged_in:
                                     }
                                     """,
                                 ): 
-                                    card_cols = st.columns([0.05,0.3,0.4,0.1,0.05])
                                     y = added_movies.iloc[x]
+                                    card_cols = st.columns([0.05,0.45,0.45,0.05])
+                                    button_containers = st.columns([0.4,0.6])
                                     with card_cols[1]:
+                                        
+                                        
+                                        # add_vertical_space(1)
+                                        # st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Review Date: {y.date_added}</p>", unsafe_allow_html=True)
+                                        
                                         add_vertical_space(1)
                                         # card(
                                         #     title='',
@@ -276,32 +282,29 @@ if st.session_state.logged_in:
                                         #             },
                                         #     on_click=do_nothing
                                         # )
-                                        st.image('https://image.tmdb.org/t/p/original/'+y.poster, width=120)
+                                        st.image('https://image.tmdb.org/t/p/original/'+y.poster, caption=y.title, use_column_width=True)
+                                        add_vertical_space(1)
                                         
-                                        
-                                    
-                                    left_details = {}
-                                    left_details['title'] = y.title
-                                    left_details['director'] = y.director
-                                    left_details['lead'] = y.lead
-                                    left_details['release_date'] = y.release_date
-                                    left_details['date_reviewed'] = str(y.date_added)
-                                    
-                                    # with card_cols[2]:
-                                    #     add_vertical_space(1)
-                                    #     st.write(left_details)
+                                    # left_details = {}
+                                    # left_details['title'] = y.title
+                                    # left_details['director'] = y.director
+                                    # left_details['lead'] = y.lead
+                                    # left_details['release_date'] = y.release_date
+                                    # left_details['date_reviewed'] = str(y.date_added)
                                     
                                     with card_cols[2]:
                                         add_vertical_space(1)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Title: {y.title}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Director: {y.director}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Lead: {y.lead}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Release Date: {y.release_date}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Review Date: {y.date_added}</p>", unsafe_allow_html=True)
-                                        
-                                    card_cols[3].button('❌', key=y.id, on_click=remove_movie, args=[y.id, tier])
+                                        st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Title:     {y.title}</p>", unsafe_allow_html=True)
+                                        st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Director:     {y.director}</p>", unsafe_allow_html=True)
+                                        st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Lead:      {y.lead}</p>", unsafe_allow_html=True)
+                                        st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Release Date:      {y.release_date}</p>", unsafe_allow_html=True)
+                                        st.markdown(f"<p style='text-align: center; color: black; font-size: 14px;'>Review Date:     {y.date_added}</p>", unsafe_allow_html=True)
                                     
-                                    add_vertical_space(1)
+                                    button_containers[1].button('❌', key=y.id, on_click=remove_movie, args=[y.id, tier])
+            else:
+                add_vertical_space(20)
+                st.markdown(f"<p style='text-align: center; color: black; font-size: 16px;'>No movies here.</p>", unsafe_allow_html=True)
+                
                                            
 else:
     add_vertical_space(3)
