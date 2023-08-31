@@ -123,6 +123,7 @@ def authenticate():
             user_info = doc.to_dict()
             if st.session_state.pass_input == user_info['pass']:
                 st.session_state.user = st.session_state.user_input
+                st.session_state.added_movies_user = st.session_state.user_input
                 st.session_state.logged_in = True
                 st.session_state.user_input = None
                 st.session_state.pass_input = None
@@ -217,142 +218,108 @@ if st.session_state.logged_in:
                     
 # -----------------------                                       ----------------------   
 
-add_vertical_space(1)
-if st.session_state.logged_in: 
-    tier_tabs = st.tabs(['S tier         ', 'A tier         ', 'B tier         ', 'C tier         '])
-    for i,tab in enumerate(tier_tabs):
-        if i == 0:
-            tier = 's'
-            added_movies = st.session_state.added_movies_s
-        elif i == 1:
-            tier = 'a'
-            added_movies = st.session_state.added_movies_a
-        elif i == 2:
-            tier = 'b'
-            added_movies = st.session_state.added_movies_b
-        else:
-            tier = 'c'
-            added_movies = st.session_state.added_movies_c
-          
-        with tab:
-            add_vertical_space(1)
-            if added_movies.shape[0] > 0:
-                grid_container = st.container()   
-                with grid_container:    
-                    grid_cols = st.columns(3)
-                    for x in range(added_movies.shape[0]):
-                        col = grid_cols[x%3]
-                        with col:
-                            with stylable_container(
-                                key="container_with_border",
-                                css_styles="""
-                                    {
-                                        border: 1px solid rgba(49, 51, 63, 0.2);
-                                        border-radius: 0.5rem;
-                                        padding: calc(1em - 1px)
-                                        
-                                    }
-                                    """,
-                                ): 
-                                    card_cols = st.columns([0.05,0.3,0.4,0.1,0.05])
-                                    y = added_movies.iloc[x]
-                                    with card_cols[1]:
-                                        add_vertical_space(1)
-                                        # card(
-                                        #     title='',
-                                        #     text='',
-                                        #     image='https://image.tmdb.org/t/p/original/'+y.poster,
-                                        #     styles={
-                                        #                 "card": {
-                                        #                     "width": "230px",
-                                        #                     "height": "250px",
-                                        #                     "border-radius": "10px",
-                                        #                     "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
-                                        #                     "margin": "10",
-                                        #                 },
-                                        #                 "filter": {
-                                        #                     "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
-                                        #                 },
-                                        #             },
-                                        #     on_click=do_nothing
-                                        # )
-                                        st.image('https://image.tmdb.org/t/p/original/'+y.poster, width=120)
-                                        
-                                        
-                                    
-                                    left_details = {}
-                                    left_details['title'] = y.title
-                                    left_details['director'] = y.director
-                                    left_details['lead'] = y.lead
-                                    left_details['release_date'] = y.release_date
-                                    left_details['date_reviewed'] = str(y.date_added)
-                                    
-                                    # with card_cols[2]:
-                                    #     add_vertical_space(1)
-                                    #     st.write(left_details)
-                                    
-                                    with card_cols[2]:
-                                        add_vertical_space(1)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Title: {y.title}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Director: {y.director}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Lead: {y.lead}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Release Date: {y.release_date}</p>", unsafe_allow_html=True)
-                                        st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Review Date: {y.date_added}</p>", unsafe_allow_html=True)
-                                        
-                                    card_cols[3].button('❌', key=y.id, on_click=remove_movie, args=[y.id, tier])
-                                    
-                                    add_vertical_space(1)
-                                           
-else:
-    add_vertical_space(3)
-    bin_str = get_base64_of_bin_file('./resources/login_image.png')
-    with stylable_container(
-        key="background_container",
-        css_styles="""
-            {
-                border: 1px solid rgba(49, 51, 63, 0.2);
-                border-radius: 0.5rem;
-                padding: calc(1em - 1px);
-                background-image: url("data:image/png;base64,%s");
-                background-size: contain;
-            }
+# ----------- Setup page layout/containers ------------------
 
-            """ % bin_str,
-        ): 
-        add_vertical_space(19)
-        st.markdown(f"<h3 style='text-align: center; color: black;'>Login to start rating movies.</h3>", unsafe_allow_html=True)
-        add_vertical_space(21)
-            
-            
-    with st.sidebar:
-        login_tab, sign_up_tab = st.tabs(['Login', 'Sign-Up'])
-        with login_tab:     
-            with stylable_container(
-                key="container",
-                css_styles="""
-                    {
-                        text-align: center;
-                        padding: 0, 10, 0, 10;
-                    }
-                    """,
-            ):
-                with st.form('login'):
-                    user = st.text_input('Username', key='user_input')
-                    password = st.text_input('Password', key='pass_input')
-                    login = st.form_submit_button('Login', on_click=authenticate)
-        with sign_up_tab:
-            with stylable_container(
-                key="container",
-                css_styles="""
-                    {
-                        text-align: center;
-                        padding: 0, 10, 0, 10;
-                    }
-                    """,
-            ):
-                with st.form('signup'):
-                    email = st.text_input('Email', key='email_input')
-                    user = st.text_input('Username', key='s_user_input')
-                    password = st.text_input('Password', key='s_pass_input')
-                    signup = st.form_submit_button('Sign-Up', on_click=sign_up)
+main_columns = st.columns([0.2,0.8,0.2])
+with main_columns[1]:
+    add_vertical_space(3)
+    search_container = st.container()
+    add_vertical_space(1)
+    info_container = st.container()
     
+search_container.markdown(f"<p style='text-align: left; font-size: 16px; color: black;'>👤Search Users</p>", unsafe_allow_html=True)
+search = search_container.text_input('Search Users', label_visibility='collapsed')
+
+if search:
+    user_ref = st.session_state.db.collection('users').document(search)
+    doc = user_ref.get()
+    if doc.exists:
+        user_info = doc.to_dict()
+        added_movies_s = pd.DataFrame(user_info['addedMoviesS'])
+        added_movies_a = pd.DataFrame(user_info['addedMoviesA'])
+        added_movies_b = pd.DataFrame(user_info['addedMoviesB'])
+        added_movies_c = pd.DataFrame(user_info['addedMoviesC'])
+            
+        tier_tabs = st.tabs(['S tier         ', 'A tier         ', 'B tier         ', 'C tier         '])
+        for i,tab in enumerate(tier_tabs):
+            if i == 0:
+                tier = 's'
+                added_movies = added_movies_s
+            elif i == 1:
+                tier = 'a'
+                added_movies = added_movies_a
+            elif i == 2:
+                tier = 'b'
+                added_movies = added_movies_b
+            else:
+                tier = 'c'
+                added_movies = added_movies_c
+            
+            with tab:
+                add_vertical_space(1)
+                if added_movies.shape[0] > 0:
+                    grid_container = st.container()   
+                    with grid_container:    
+                        grid_cols = st.columns(3)
+                        for x in range(added_movies.shape[0]):
+                            col = grid_cols[x%3]
+                            with col:
+                                with stylable_container(
+                                    key="container_with_border",
+                                    css_styles="""
+                                        {
+                                            border: 1px solid rgba(49, 51, 63, 0.2);
+                                            border-radius: 0.5rem;
+                                            padding: calc(1em - 1px)
+                                            
+                                        }
+                                        """,
+                                    ): 
+                                        card_cols = st.columns([0.05,0.3,0.4,0.1,0.05])
+                                        y = added_movies.iloc[x]
+                                        with card_cols[1]:
+                                            add_vertical_space(1)
+                                            # card(
+                                            #     title='',
+                                            #     text='',
+                                            #     image='https://image.tmdb.org/t/p/original/'+y.poster,
+                                            #     styles={
+                                            #                 "card": {
+                                            #                     "width": "230px",
+                                            #                     "height": "250px",
+                                            #                     "border-radius": "10px",
+                                            #                     "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
+                                            #                     "margin": "10",
+                                            #                 },
+                                            #                 "filter": {
+                                            #                     "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
+                                            #                 },
+                                            #             },
+                                            #     on_click=do_nothing
+                                            # )
+                                            st.image('https://image.tmdb.org/t/p/original/'+y.poster, width=120)
+                                            
+                                            
+                                        
+                                        left_details = {}
+                                        left_details['title'] = y.title
+                                        left_details['director'] = y.director
+                                        left_details['lead'] = y.lead
+                                        left_details['release_date'] = y.release_date
+                                        left_details['date_reviewed'] = str(y.date_added)
+                                        
+                                        # with card_cols[2]:
+                                        #     add_vertical_space(1)
+                                        #     st.write(left_details)
+                                        
+                                        with card_cols[2]:
+                                            add_vertical_space(1)
+                                            st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Title: {y.title}</p>", unsafe_allow_html=True)
+                                            st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Director: {y.director}</p>", unsafe_allow_html=True)
+                                            st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Lead: {y.lead}</p>", unsafe_allow_html=True)
+                                            st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Release Date: {y.release_date}</p>", unsafe_allow_html=True)
+                                            st.markdown(f"<p style='text-align: left; color: black; font-size: 14px;'>Review Date: {y.date_added}</p>", unsafe_allow_html=True)
+                                            
+                                        card_cols[3].button('❌', key=y.id, on_click=remove_movie, args=[y.id, tier])
+                                        
+                                        add_vertical_space(1)
