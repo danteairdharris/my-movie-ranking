@@ -2,7 +2,7 @@ import streamlit as st
 from streamlit_extras.card import card
 from streamlit_extras.stylable_container import stylable_container
 from streamlit_extras.add_vertical_space import add_vertical_space
-from __init__ import timeline
+from custom_timeline import timeline
 
 from google.cloud import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
