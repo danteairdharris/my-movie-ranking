@@ -130,7 +130,7 @@ def authenticate():
                 st.session_state.pass_input = None
                 added_movies = user_info['added_movies']
                 if len(added_movies) > 0:
-                    st.session_state.added_movies_s = pd.DataFrame(added_movies)
+                    st.session_state.added_movies = pd.DataFrame(added_movies)
                     
                 convert_to_timeline()
                 
