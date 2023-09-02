@@ -73,8 +73,6 @@ if 'added_movies_b' not in st.session_state.keys():
     st.session_state.added_movies_b = pd.DataFrame(columns=['id', 'title', 'director', 'lead', 'date_added']) 
 if 'added_movies_c' not in st.session_state.keys():
     st.session_state.added_movies_c = pd.DataFrame(columns=['id', 'title', 'director', 'lead', 'date_added']) 
-if 'added_movies_user' not in st.session_state.keys():
-    st.session_state.added_movies_user = None
     
 if 'logged_in' not in st.session_state.keys():
     st.session_state.logged_in = False
@@ -121,7 +119,6 @@ def authenticate():
             user_info = doc.to_dict()
             if st.session_state.pass_input == user_info['pass']:
                 st.session_state.user = st.session_state.user_input
-                st.session_state.added_movies_user = st.session_state.user_input
                 st.session_state.logged_in = True
                 st.session_state.user_input = None
                 st.session_state.pass_input = None
