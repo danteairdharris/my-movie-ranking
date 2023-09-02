@@ -47,11 +47,9 @@ st.markdown("""
     p {
         line-height: 1em;
     }
-    #tabs-bui715-tabpanel-0 > div:nth-child(1) > div > div:nth-child(2) > div > div > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(1) > div > div.css-ocqkz7.e1f1d6gn3 > div.css-17zpgat.e1f1d6gn1 {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+    .css-eczf16 {
+        display:none
+    } 
 
 </style>
 
@@ -87,6 +85,7 @@ if 'db' not in st.session_state.keys():
     key_dict = json.loads(st.secrets["textkey"])
     creds = service_account.Credentials.from_service_account_info(key_dict)
     st.session_state.db = firestore.Client(credentials=creds, project="my-movie-ranking")
+
 
 # endregion -------------------- ------ ------------------------------
     

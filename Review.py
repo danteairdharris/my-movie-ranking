@@ -47,6 +47,9 @@ st.markdown("""
     img {
         border-radius: 5%;
     }
+    .css-eczf16 {
+        display:none
+    } 
 
 </style>
 
@@ -128,27 +131,6 @@ def get_movie_details(selection,pp,overview):
     st.session_state.movie_details = info
 
 
-#     if st.session_state.movie_details != {}:
-    # with info_container.container():
-    #     sb_cols = st.columns([0.05,0.45,0.45,0.05])
-    #     sb_cols[1].image('https://image.tmdb.org/t/p/original/'+st.session_state.movie_details['poster_path'], use_column_width=True, caption=st.session_state.movie_details['title'])
-        # keys = ['director', 'lead', 'release_date']
-        # display = {}
-        # for key, value in st.session_state.movie_details.items():
-        #     if key in keys:
-        #         display[key] = value 
-
-        # sb_cols[2].write(display)
-        
-        # add_vertical_space(2)
-        # sb_cols1 = st.columns([0.3,0.4,0.3])
-        # st.session_state.id_match = st.session_state.added_movies.loc[st.session_state.added_movies['id'] == st.session_state.movie_details['id']]
-        # if st.session_state.id_match.empty:
-        #     rate = sb_cols1[1].button('⭐Review', use_container_width=True)
-        # else:
-        #     rate = sb_cols1[1].button('✏️Edit', use_container_width=True)
-        # if rate:
-        #     st.write('pressed')
         
 def remove_movie(id, tier, button):
     if tier == None or tier == button:
@@ -298,101 +280,106 @@ if st.session_state.logged_in:
         main_columns = st.columns([0.2,0.8,0.2])
         with main_columns[1]:
             search_container = st.container()
-            with search_container:
-                add_vertical_space(1)
-                st.markdown(f"<p style='text-align: left; font-size: 16px; color: black;'>🔍Search Movies</p>", unsafe_allow_html=True)
-                search = search_container.text_input('Search Movies', label_visibility='collapsed')
+            info_container = st.container()
+            buttons_container = st.container()
+            
+        with search_container:
+            add_vertical_space(1)
+            st.markdown(f"<p style='text-align: left; font-size: 16px; color: black;'>🔍Search Movies</p>", unsafe_allow_html=True)
+            search = search_container.text_input('Search Movies', label_visibility='collapsed')
                 
-                if search:
-                    add_vertical_space(1)
-                    info_container = main_columns[1].container()
-                    search_movies(search)
-                    sorted_list = sort_results()
-                    selection = search_container.selectbox('', sorted_list, label_visibility='collapsed')
-                    if selection:
-                        for x in st.session_state.search_results:
-                            if x[0] == selection[2]:
-                                pp = x[3]
-                                overview = x[4]
-                        get_movie_details(selection, pp, overview)
-                        movie = st.session_state.movie_details
-                        with info_container:
+        if search:
+            add_vertical_space(1)
+            search_movies(search)
+            sorted_list = sort_results()
+            selection = search_container.selectbox('', sorted_list, label_visibility='collapsed')
+            if selection:
+                for x in st.session_state.search_results:
+                    if x[0] == selection[2]:
+                        pp = x[3]
+                        overview = x[4]
+                get_movie_details(selection, pp, overview)
+                movie = st.session_state.movie_details
+                
+                 ## check for matches 
+                tier = None
+                rev_date = None
+                
+                id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
+                if not id_match.empty:
+                    tier = 'S'
+                    rev_date = st.session_state.added_movies_s.loc[id_match.index].date_added.values[0]   
+                id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
+                if not id_match.empty:
+                    tier = 'A'
+                    rev_date = st.session_state.added_movies_a.loc[id_match.index].date_added.values[0]   
+                id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
+                if not id_match.empty:
+                    tier = 'B'
+                    rev_date = st.session_state.added_movies_b.loc[id_match.index].date_added.values[0]   
+                id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
+                if not id_match.empty:
+                    tier = 'C'
+                    rev_date = st.session_state.added_movies_c.loc[id_match.index].date_added.values[0]   
+                
+                with info_container:
+                                   
+                    with stylable_container(
+                        key="container_with_border",
+                        css_styles="""
+                            {
+                                border: 1px solid rgba(49, 51, 63, 0.2);
+                                border-radius: 0.5rem;
+                                padding: calc(1em - 1px);
+                            }
+                            """,
+                        ): 
+                                
+                            if tier != None and rev_date != None:
+                                st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Last reviewed as {tier} tier on {rev_date}</h3>", unsafe_allow_html=True)
+                            else:
+                                st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>You have not yet rated this movie.</h3>", unsafe_allow_html=True)
                             
-                            ## check for matches 
-                            tier = None
-                            rev_date = None
-                            
-                            id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
-                            if not id_match.empty:
-                                tier = 'S'
-                                rev_date = st.session_state.added_movies_s.loc[id_match.index].date_added.values[0]   
-                            id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
-                            if not id_match.empty:
-                                tier = 'A'
-                                rev_date = st.session_state.added_movies_a.loc[id_match.index].date_added.values[0]   
-                            id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
-                            if not id_match.empty:
-                                tier = 'B'
-                                rev_date = st.session_state.added_movies_b.loc[id_match.index].date_added.values[0]   
-                            id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
-                            if not id_match.empty:
-                                tier = 'C'
-                                rev_date = st.session_state.added_movies_c.loc[id_match.index].date_added.values[0]   
-                                
-                                    
-                                
-                            with stylable_container(
-                                key="container_with_border",
-                                css_styles="""
-                                    {
-                                        border: 1px solid rgba(49, 51, 63, 0.2);
-                                        border-radius: 0.5rem;
-                                        padding: calc(1em - 1px);
-                                    }
-                                    """,
-                                ): 
-                                
-                                if tier != None and rev_date != None:
-                                    st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Last reviewed as {tier} tier on {rev_date}</h3>", unsafe_allow_html=True)
-                                
-                                add_vertical_space(1)   
-                                info_cols = st.columns([0.1,0.4,0.4,0.1])
-                                with info_cols[1]:
-                                    add_vertical_space(1)
-                                    # card(
-                                    #     title='', 
-                                    #     text=movie['title'],
-                                    #     image='https://image.tmdb.org/t/p/original/'+movie['poster_path'], 
-                                    #     styles={
-                                    #         "card": {
-                                    #             "width": "275px",
-                                    #             "height": "250px",
-                                    #             "border-radius": "10px",
-                                    #             "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
-                                    #             "margin": "10"
-                                            
-                                    #         },
-                                    #         "text": {
-                                    #             "font-family": "sans-serif",
-                                    #         },
-                                    #         "filter": {
-                                    #             "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
-                                    #         },
-                                    #     },
-                                    #     on_click=do_nothing
-                                    #     )
-                                    st.image('https://image.tmdb.org/t/p/original/'+movie['poster_path'], caption=movie['title'], width=280)
-                                    
-                                keys = ['title', 'director', 'lead', 'release_date']
-                                display = {}
-                                for key, value in st.session_state.movie_details.items():
-                                    if key in keys:
-                                        display[key] = value 
-                                with info_cols[2]:
-                                    add_vertical_space(1)
-                                    st.write(display)
+                            add_vertical_space(1)   
+                            info_cols = st.columns([0.13,0.37,0.4,0.1])
+                            with info_cols[1]:
                                 add_vertical_space(1)
-
+                                # card(
+                                #     title='', 
+                                #     text=movie['title'],
+                                #     image='https://image.tmdb.org/t/p/original/'+movie['poster_path'], 
+                                #     styles={
+                                #         "card": {
+                                #             "width": "275px",
+                                #             "height": "250px",
+                                #             "border-radius": "10px",
+                                #             "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
+                                #             "margin": "10"
+                                        
+                                #         },
+                                #         "text": {
+                                #             "font-family": "sans-serif",
+                                #         },
+                                #         "filter": {
+                                #             "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
+                                #         },
+                                #     },
+                                #     on_click=do_nothing
+                                #     )
+                                st.image('https://image.tmdb.org/t/p/original/'+movie['poster_path'],  width=225)
+                                    
+                            keys = ['title', 'director', 'lead', 'release_date']
+                            display = {}
+                            for key, value in st.session_state.movie_details.items():
+                                if key in keys:
+                                    display[key] = value 
+                            with info_cols[2]:
+                                add_vertical_space(1)
+                                st.write(display)
+                                
+                            add_vertical_space(2)
+                        
+                with buttons_container:
                     st.markdown(f"<h3 style='text-align: center; color: black; font-size: 20px;'>Rate this movie</h3>", unsafe_allow_html=True)
                     form_columns = st.columns(4)
 
@@ -409,70 +396,71 @@ if st.session_state.logged_in:
                         a_button = form_columns[1].button('A tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'A'])
                         b_button = form_columns[2].button('B tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'B'])
                         c_button = form_columns[3].button('C tier', use_container_width=True, on_click=remove_movie, args=[st.session_state.movie_details['id'], tier, 'C'])
-                        
+                        add_vertical_space(1)  
                     
                     
-                    if s_button:
-                        st.session_state.id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
-                        release = st.session_state.movie_details['release_date']
-                        review_date = date.today()
-                        user_ref = st.session_state.db.collection('users').document(st.session_state.user)
-                        if st.session_state.id_match.empty:
-                            df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
-                            st.session_state.added_movies_s = pd.concat([st.session_state.added_movies_s, df_new], ignore_index=True)
-                        else: 
-                            st.session_state.added_movies_s.loc[st.session_state.id_match.index,'date_added'] = review_date 
+                if s_button:
+                    st.session_state.id_match = st.session_state.added_movies_s.loc[st.session_state.added_movies_s['id'] == st.session_state.movie_details['id']]
+                    release = st.session_state.movie_details['release_date']
+                    review_date = date.today()
+                    user_ref = st.session_state.db.collection('users').document(st.session_state.user)
+                    if st.session_state.id_match.empty:
+                        df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
+                        st.session_state.added_movies_s = pd.concat([st.session_state.added_movies_s, df_new], ignore_index=True)
+                    else: 
+                        st.session_state.added_movies_s.loc[st.session_state.id_match.index,'date_added'] = review_date 
+                    
+                    user_ref.set({'addedMoviesS': st.session_state.added_movies_s.to_dict('records')}, merge=True)
+                    st.session_state.movie_details = {} 
+                    switch_page('home')
                         
-                        user_ref.set({'addedMoviesS': st.session_state.added_movies_s.to_dict('records')}, merge=True)
-                        st.session_state.movie_details = {} 
-                        switch_page('home')
-                            
-                    if a_button:
-                        st.session_state.id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
-                        release = st.session_state.movie_details['release_date']
-                        review_date = date.today()
-                        user_ref = st.session_state.db.collection('users').document(st.session_state.user)
-                        if st.session_state.id_match.empty:
-                            df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
-                            st.session_state.added_movies_a = pd.concat([st.session_state.added_movies_a, df_new], ignore_index=True)
-                        else: 
-                            st.session_state.added_movies_a.loc[st.session_state.id_match.index,'date_added'] = review_date 
-                            
-                        user_ref.set({'addedMoviesA': st.session_state.added_movies_a.to_dict('records')}, merge=True) 
-                        st.session_state.movie_details = {} 
-                        switch_page('home')
-                            
-                    if b_button:
-                        st.session_state.id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
-                        release = st.session_state.movie_details['release_date']
-                        review_date = date.today()
-                        user_ref = st.session_state.db.collection('users').document(st.session_state.user)
-                        if st.session_state.id_match.empty:
-                            df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
-                            st.session_state.added_movies_b = pd.concat([st.session_state.added_movies_b, df_new], ignore_index=True)
-                        else: 
-                            st.session_state.added_movies_b.loc[st.session_state.id_match.index,'date_added'] = review_date 
-                            
-                        user_ref.set({'addedMoviesB': st.session_state.added_movies_b.to_dict('records')}, merge=True)    
-                        st.session_state.movie_details = {} 
-                        switch_page('home')
-                            
-                    if c_button:
-                        st.session_state.id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
-                        release = st.session_state.movie_details['release_date']
-                        review_date = date.today()
-                        user_ref = st.session_state.db.collection('users').document(st.session_state.user)
-                        if st.session_state.id_match.empty:
-                            df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
-                            st.session_state.added_movies_c = pd.concat([st.session_state.added_movies_c, df_new], ignore_index=True)
-                        else: 
-                            st.session_state.added_movies_c.loc[st.session_state.id_match.index,'date_added'] = review_date 
+                if a_button:
+                    st.session_state.id_match = st.session_state.added_movies_a.loc[st.session_state.added_movies_a['id'] == st.session_state.movie_details['id']]
+                    release = st.session_state.movie_details['release_date']
+                    review_date = date.today()
+                    user_ref = st.session_state.db.collection('users').document(st.session_state.user)
+                    if st.session_state.id_match.empty:
+                        df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
+                        st.session_state.added_movies_a = pd.concat([st.session_state.added_movies_a, df_new], ignore_index=True)
+                    else: 
+                        st.session_state.added_movies_a.loc[st.session_state.id_match.index,'date_added'] = review_date 
+                        
+                    user_ref.set({'addedMoviesA': st.session_state.added_movies_a.to_dict('records')}, merge=True) 
+                    st.session_state.movie_details = {} 
+                    switch_page('home')
+                        
+                if b_button:
+                    st.session_state.id_match = st.session_state.added_movies_b.loc[st.session_state.added_movies_b['id'] == st.session_state.movie_details['id']]
+                    release = st.session_state.movie_details['release_date']
+                    review_date = date.today()
+                    user_ref = st.session_state.db.collection('users').document(st.session_state.user)
+                    if st.session_state.id_match.empty:
+                        df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
+                        st.session_state.added_movies_b = pd.concat([st.session_state.added_movies_b, df_new], ignore_index=True)
+                    else: 
+                        st.session_state.added_movies_b.loc[st.session_state.id_match.index,'date_added'] = review_date 
+                        
+                    user_ref.set({'addedMoviesB': st.session_state.added_movies_b.to_dict('records')}, merge=True)    
+                    st.session_state.movie_details = {} 
+                    switch_page('home')
+                        
+                if c_button:
+                    st.session_state.id_match = st.session_state.added_movies_c.loc[st.session_state.added_movies_c['id'] == st.session_state.movie_details['id']]
+                    release = st.session_state.movie_details['release_date']
+                    review_date = date.today()
+                    user_ref = st.session_state.db.collection('users').document(st.session_state.user)
+                    if st.session_state.id_match.empty:
+                        df_new = pd.DataFrame.from_dict({'id': [st.session_state.movie_details['id']], 'title': [st.session_state.movie_details['title']], 'director': st.session_state.movie_details['director'], 'lead': st.session_state.movie_details['lead'], 'date_added': [review_date.strftime("%m/%d/%Y")], 'release_date': [release], 'poster': [st.session_state.movie_details['poster_path']]})
+                        st.session_state.added_movies_c = pd.concat([st.session_state.added_movies_c, df_new], ignore_index=True)
+                    else: 
+                        st.session_state.added_movies_c.loc[st.session_state.id_match.index,'date_added'] = review_date 
 
-                        user_ref.set({'addedMoviesC': st.session_state.added_movies_c.to_dict('records')}, merge=True)
-                        st.session_state.movie_details = {} 
-                        switch_page('home')
-                else:
-                    add_vertical_space(45)        
+                    user_ref.set({'addedMoviesC': st.session_state.added_movies_c.to_dict('records')}, merge=True)
+                    st.session_state.movie_details = {} 
+                    switch_page('home')
+                    
+        else:
+            add_vertical_space(45)        
                 
     
 else:

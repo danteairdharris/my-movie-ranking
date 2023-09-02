@@ -47,6 +47,9 @@ st.markdown("""
     p {
         line-height: 1em;
     }
+    .css-eczf16 {
+        display:none
+    } 
 
 </style>
 
@@ -283,26 +286,9 @@ if search:
                                     card_cols = st.columns([0.05,0.45,0.45,0.05])
                                     y = added_movies.iloc[x]
                                     with card_cols[1]:
-                                        add_vertical_space(1)
-                                        # card(
-                                        #     title='',
-                                        #     text='',
-                                        #     image='https://image.tmdb.org/t/p/original/'+y.poster,
-                                        #     styles={
-                                        #                 "card": {
-                                        #                     "width": "230px",
-                                        #                     "height": "250px",
-                                        #                     "border-radius": "10px",
-                                        #                     "box-shadow": "0 0 0 0 rgba(0,0,0,0.5)",
-                                        #                     "margin": "10",
-                                        #                 },
-                                        #                 "filter": {
-                                        #                     "background-color": "rgba(0.0, 0.0, 0.0, 0.0)",
-                                        #                 },
-                                        #             },
-                                        #     on_click=do_nothing
-                                        # )
+                                        add_vertical_space(2)
                                         st.image('https://image.tmdb.org/t/p/original/'+y.poster, use_column_width=True)
+                                        add_vertical_space(2)
                                         
                                         
                                     
